@@ -26,6 +26,9 @@ namespace winsw
 {
     public class WrapperService : ServiceBase, EventLogger
     {
+        private const string UsernameParameter = "-username:";
+        private const string PasswordParameter = "-password:";
+
         private SERVICE_STATUS _wrapperServiceStatus;
 
         private readonly Process _process = new Process();
@@ -36,6 +39,8 @@ namespace winsw
 
         private static readonly ILog Log = LogManager.GetLogger("WinSW");
         private static readonly WrapperServiceEventLogProvider eventLogProvider = new WrapperServiceEventLogProvider();
+
+
 
         /// <summary>
         /// Indicates to the watch dog thread that we are going to terminate the process,
@@ -570,6 +575,17 @@ namespace winsw
                         {
                             setallowlogonasaserviceright = true;
                         }
+                    } else if (args.Count == 3)
+                    {
+                        // args are : install -username:username -password:password
+                        // "setallowlogonasaserviceright" is false by default
+                        String usernameParam = args[1];
+                        String passwordParam = args[2];
+                        username = GetParameterByName(usernameParam, UsernameParameter);
+                        password = GetParameterByName(passwordParam, PasswordParameter);
+
+                        setallowlogonasaserviceright = false;
+                        Console.Write($"Setting username/password from commandline args. username={username}");
                     }
                     else
                     {
@@ -768,6 +784,15 @@ namespace winsw
                 Log.Info("Starting ServiceWrapper in the service mode");
             }
             Run(new WrapperService());
+        }
+
+        public static String GetParameterByName(String parameterValue, String parameterName )
+        {
+            if (parameterValue.StartsWith(parameterName))
+            {
+                return parameterValue.Substring(parameterName.Length);
+            }
+            return "";
         }
 
         private static void InitLoggers(ServiceDescriptor d, bool enableCLILogging)

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using winsw;
 using winswTests.Util;
 
@@ -15,6 +16,14 @@ namespace winswTests
             string cliOut = CLITestHelper.CLITest(new[] { "version" });
             StringAssert.Contains(expectedVersion, cliOut, "Expected that version contains " + expectedVersion);
         }
+
+        [Test]
+        public void GetParameterTest()
+        {
+            String expectedUsername = "pretenduser";
+            Assert.AreEqual(expectedUsername, WrapperService.GetParameterByName("-username:pretenduser", "-username:"));
+        }
+
 
         [Test]
         public void PrintHelp()
